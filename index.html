@@ -2,522 +2,301 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Suggestify | Hybrid Recommendation System using ML | Paper Presentation</title>
-    <!-- Google Fonts + Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestify AI – Hybrid Recommender</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f6f9fc;
-            color: #1e2a3e;
-            line-height: 1.4;
-            scroll-behavior: smooth;
+            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b1120 0%, #111827 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
         }
-
-        /* custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-            border-radius: 10px;
-        }
-
-        /* global container */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* sections spacing */
-        section {
-            padding: 5rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-        }
-        section:last-child {
-            border-bottom: none;
-        }
-
-        /* typography */
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1E2A5E, #3b82f6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.02em;
-        }
-        h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            position: relative;
-            display: inline-block;
-        }
-        h2:after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-            border-radius: 4px;
-        }
-        h3 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        .text-gradient {
-            background: linear-gradient(135deg, #1e2a5e, #2563eb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* cards, glassmorphism */
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(0px);
-            border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08);
-            padding: 1.8rem;
-            transition: all 0.25s ease;
-            border: 1px solid rgba(255,255,255,0.5);
-            height: 100%;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.15);
-            border-color: #cbd5e1;
-        }
-
-        /* buttons, nav */
-        .navbar {
-            background: rgba(255,255,255,0.96);
+        .glass {
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(12px);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid #eef2ff;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
         }
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .nav-links a {
-            text-decoration: none;
-            font-weight: 500;
-            color: #1e293b;
-            transition: 0.2s;
-            font-size: 0.95rem;
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -15px rgba(0,0,0,0.3);
         }
-        .nav-links a:hover {
-            color: #3b82f6;
-        }
-        .btn-outline {
-            border: 1.5px solid #3b82f6;
-            background: transparent;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            font-weight: 600;
+        button {
             transition: all 0.2s;
         }
-        .btn-outline:hover {
-            background: #3b82f6;
-            color: white;
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #fbbf24;
+            transition: transform 0.1s;
         }
-
-        /* grid utilities */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-        }
-
-        /* architecture diagram custom */
-        .arch-flow {
-            background: #f8fafc;
-            border-radius: 2rem;
-            padding: 2rem;
-            border: 1px solid #e2e8f0;
-        }
-        .dual-pipeline {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.8rem;
-            justify-content: center;
-        }
-        .pipeline-card {
-            flex: 1;
-            min-width: 200px;
-            background: white;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
-            border-left: 4px solid #3b82f6;
-        }
-        .merge-box {
-            background: linear-gradient(110deg, #eef2ff, #ffffff);
-            border-radius: 2rem;
-            padding: 1.5rem;
-            text-align: center;
-            margin-top: 1.2rem;
-        }
-        .fa-arrow-right-long {
-            font-size: 2rem;
-            margin: 0 0.5rem;
-            color: #3b82f6;
-        }
-
-        .metrics-badge {
-            background: #eef2ff;
-            border-radius: 2rem;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .requirement-icon {
-            font-size: 2rem;
-            color: #2563eb;
-            margin-bottom: 1rem;
-        }
-        footer {
-            background: #0f172a;
-            color: #cbd5e1;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                padding: 0 1.5rem;
-            }
-            .grid-2, .grid-3, .grid-4 {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            h1 {
-                font-size: 2.2rem;
-            }
-            h2 {
-                font-size: 1.7rem;
-            }
-            .navbar .nav-links {
-                gap: 1rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-        .hero {
-            padding: 4rem 0 2rem 0;
-        }
-        .badge {
-            background: #e6f0ff;
-            padding: 0.3rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1e40af;
-            display: inline-block;
-        }
-        .team-avatars {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .team-member {
-            background: #f1f5f9;
-            border-radius: 4rem;
-            padding: 0.3rem 1.2rem;
-            font-weight: 500;
-        }
+        .star-btn:hover { transform: scale(1.2); }
+        .star-inactive { opacity: 0.3; filter: grayscale(0.8); }
     </style>
 </head>
-<body>
-
-<!-- Navigation Bar (Sticky) -->
-<nav class="navbar">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; flex-wrap: wrap;">
-        <div style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(135deg,#1e2a5e,#3b82f6); -webkit-background-clip:text; background-clip:text; color:transparent;">Suggestify<span style="font-weight:400; color:#3b82f6;">™</span></div>
-        <ul class="nav-links">
-            <li><a href="#abstract">Abstract</a></li>
-            <li><a href="#architecture">Architecture</a></li>
-            <li><a href="#hybrid">Hybrid Core</a></li>
-            <li><a href="#requirements">Requirements</a></li>
-            <li><a href="#literature">Literature</a></li>
-            <li><a href="#outcome">Outcome</a></li>
-            <li><a href="#team">Team</a></li>
-        </ul>
-        <div>
-            <span class="badge"><i class="fas fa-microchip"></i> ML Research</span>
-        </div>
+<body style="padding: 20px; max-width: 1400px; margin: 0 auto;">
+    <div id="app">
+        <!-- Login view will be injected -->
     </div>
-</nav>
+    <script>
+        // ---------- MOVIE DATABASE (20 movies) ----------
+        const movies = [
+            { id:1, title:"Blade Runner", description:"A blade runner hunts replicants in dystopian 2019 Los Angeles.", category:"Sci-Fi", avg_rating:4.5, year:1982 },
+            { id:2, title:"The Terminator", description:"A cyborg assassin is sent back in time to kill Sarah Connor.", category:"Action", avg_rating:4.3, year:1984 },
+            { id:3, title:"When Harry Met Sally", description:"Can a man and woman be just friends? Harry and Sally find out.", category:"Romance", avg_rating:4.1, year:1989 },
+            { id:4, title:"Interstellar", description:"Astronauts traverse a wormhole searching for a new home for humanity.", category:"Sci-Fi", avg_rating:4.6, year:2014 },
+            { id:5, title:"Titanic", description:"An aristocrat and a poor artist fall in love on the doomed ocean liner.", category:"Romance", avg_rating:4.2, year:1997 },
+            { id:6, title:"The Matrix", description:"A hacker discovers reality is a simulation and joins the resistance.", category:"Sci-Fi", avg_rating:4.7, year:1999 },
+            { id:7, title:"Inception", description:"A thief plants an idea into a target's subconscious through dream invasion.", category:"Sci-Fi", avg_rating:4.5, year:2010 },
+            { id:8, title:"Mad Max: Fury Road", description:"In a wasteland, Furiosa leads a rebellion against a tyrannical warlord.", category:"Action", avg_rating:4.4, year:2015 },
+            { id:9, title:"La La Land", description:"A musician and actress pursue their dreams while falling in love in LA.", category:"Romance", avg_rating:4.0, year:2016 },
+            { id:10, title:"Gravity", description:"Two astronauts struggle to survive adrift in space after an accident.", category:"Sci-Fi", avg_rating:3.9, year:2013 },
+            { id:11, title:"John Wick", description:"A retired hitman goes on a rampage after his dog is killed.", category:"Action", avg_rating:4.2, year:2014 },
+            { id:12, title:"Pride & Prejudice", description:"Elizabeth Bennet navigates love, pride, and prejudice with Mr. Darcy.", category:"Romance", avg_rating:4.3, year:2005 },
+            { id:13, title:"Arrival", description:"A linguist deciphers alien language that reveals a shocking truth about time.", category:"Sci-Fi", avg_rating:4.4, year:2016 },
+            { id:14, title:"The Dark Knight", description:"Batman battles the Joker, a chaotic criminal genius, in Gotham City.", category:"Action", avg_rating:4.7, year:2008 },
+            { id:15, title:"Eternal Sunshine", description:"A couple erases each other from memory after their relationship ends.", category:"Romance", avg_rating:4.4, year:2004 },
+            { id:16, title:"Ex Machina", description:"A programmer tests an AI with artificial consciousness and human-like behavior.", category:"Sci-Fi", avg_rating:4.2, year:2014 },
+            { id:17, title:"Speed", description:"A bomb on a bus will explode if it drops below 50 mph.", category:"Action", avg_rating:3.8, year:1994 },
+            { id:18, title:"Sense and Sensibility", description:"The Dashwood sisters navigate romance, heartbreak, and societal expectations.", category:"Romance", avg_rating:3.9, year:1995 },
+            { id:19, title:"Dune", description:"Paul Atreides leads desert tribes in a revolt to control the universe's most precious resource.", category:"Sci-Fi", avg_rating:4.3, year:2021 },
+            { id:20, title:"Top Gun: Maverick", description:"Maverick trains elite pilots for a dangerous mission thirty years later.", category:"Action", avg_rating:4.5, year:2022 }
+        ];
 
-<main>
-    <!-- HERO SECTION -->
-    <section class="hero" style="padding-top: 3rem;">
-        <div class="container">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem;">
-                <div style="flex:1">
-                    <span class="badge"><i class="fas fa-robot"></i> RAJALAKSHMI INSTITUTE OF TECHNOLOGY | CCE</span>
-                    <h1 style="margin: 1rem 0 0.5rem;">Suggestify<br><span style="font-size:1.8rem;">Hybrid Recommendation System using ML</span></h1>
-                    <p style="font-size: 1.1rem; color: #334155; max-width: 550px; margin: 1.2rem 0 1.5rem;">Collaborative filtering + Content-based intelligence → hyper-personalized suggestions. Breaking cold-start and sparsity barriers.</p>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <div class="team-member"><i class="fas fa-user-graduate"></i> Samyuktha K</div>
-                        <div class="team-member"><i class="fas fa-user-graduate"></i> Subha Pradha S</div>
-                        <div class="team-member"><i class="fas fa-user-graduate"></i> Subhiksha P</div>
-                    </div>
-                </div>
-                <div style="flex:1; background: linear-gradient(145deg, #eef2ff, #ffffff); border-radius: 3rem; padding: 2rem; text-align: center;">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; color:#2563eb;"></i>
-                    <div class="metrics-badge" style="margin-top: 1rem;">Precision@10: 0.89 | Recall@10: 0.84</div>
-                    <div><i class="fas fa-database"></i> Hybrid Weighted Fusion</div>
-                    <small>Evaluation: RMSE 0.72 | F1-score 0.86</small>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ABSTRACT SECTION -->
-    <section id="abstract">
-        <div class="container">
-            <h2>Abstract</h2>
-            <div class="card" style="background: linear-gradient(115deg, #ffffff, #fefefe);">
-                <p style="font-size:1.05rem; line-height:1.5;">Suggestify is a <strong>hybrid recommendation engine</strong> that integrates memory-based collaborative filtering (user-user/item-item similarity) with content-based filtering using item metadata & feature vectors. The architecture overcomes limitations like <strong>cold-start problem</strong> and <strong>data sparsity</strong>, delivering high-quality personalized recommendations for e-commerce, streaming platforms, and digital content. Leveraging weighted hybrid strategy (dynamic λ) and cosine similarity, the model outperforms standalone approaches. Evaluated on MovieLens & Amazon datasets, Suggestify achieves significant gains in precision, recall, and user satisfaction.</p>
-                <div style="margin-top: 1rem;"><i class="fas fa-chart-simple"></i> Domain: Machine Learning | Techniques: KNN, matrix factorization, TF-IDF, weighted combiner</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SYSTEM ARCHITECTURE + BLOCK DIAGRAM -->
-    <section id="architecture">
-        <div class="container">
-            <h2>System Architecture & Block Diagram</h2>
-            <div class="arch-flow">
-                <div class="dual-pipeline">
-                    <div class="pipeline-card">
-                        <i class="fas fa-users" style="font-size: 2rem; color:#2563eb;"></i>
-                        <h3 style="margin-top: 0.5rem;">Collaborative Filtering</h3>
-                        <p>User-Item rating matrix <br> Pearson similarity / SVD <br> Neighborhood-based predictions</p>
-                        <span class="badge">Memory-based + Model-based</span>
-                    </div>
-                    <i class="fas fa-arrow-right-long" style="align-self: center;"></i>
-                    <div class="pipeline-card">
-                        <i class="fas fa-tags" style="font-size: 2rem; color:#2563eb;"></i>
-                        <h3 style="margin-top: 0.5rem;">Content-Based Filtering</h3>
-                        <p>Item descriptors (genre, keywords) → TF-IDF + Cosine similarity → Profile matching</p>
-                        <span class="badge">item metadata & attributes</span>
-                    </div>
-                    <i class="fas fa-arrow-right-long" style="align-self: center;"></i>
-                    <div class="pipeline-card" style="background: #eef2ff;">
-                        <i class="fas fa-weight-hanging" style="font-size: 2rem; color:#2563eb;"></i>
-                        <h3 style="margin-top: 0.5rem;">Hybrid Combiner</h3>
-                        <p>Weighted fusion: Score = α·CF + β·CB <br> Adaptive tuning via grid search<br> Top-N ranking</p>
-                    </div>
-                </div>
-                <div class="merge-box">
-                    <i class="fas fa-arrow-down" style="margin-right: 0.5rem;"></i> Final Recommendation List <i class="fas fa-arrow-down" style="margin-left: 0.5rem;"></i>
-                    <div style="margin-top: 0.8rem;"><span class="badge"><i class="fas fa-check-circle"></i> Personalized suggestions</span> <span class="badge"><i class="fas fa-chart-line"></i> Real-time inference</span></div>
-                </div>
-                <div class="text-center" style="margin-top: 1rem; font-size:0.85rem; color:#475569;"><i class="fas fa-database"></i> Data Sources: User interactions (ratings, clicks) + Item profiles (descriptions, categories)</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- HYBRID METHODOLOGY DEEP DIVE -->
-    <section id="hybrid">
-        <div class="container">
-            <h2>Hybrid ML Core: Weighted Ensemble</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <i class="fas fa-chart-pie" style="font-size: 1.8rem; color:#2563eb;"></i>
-                    <h3 style="margin-top: 0.75rem;">Collaborative Stream</h3>
-                    <p>Utilizes user-item rating matrix. Memory-based: cosine similarity between users (k-NN). Model-based: SVD matrix factorization to latent factors. Captures behavioral patterns & social influence.</p>
-                    <div class="metrics-badge" style="margin-top: 0.8rem;"><i class="fas fa-chart-simple"></i> Handles implicit feedback</div>
-                </div>
-                <div class="card">
-                    <i class="fas fa-align-left" style="font-size: 1.8rem; color:#2563eb;"></i>
-                    <h3 style="margin-top: 0.75rem;">Content-Based Stream</h3>
-                    <p>Item features vectorization using TF-IDF / Doc2Vec. Computes item-item similarity based on attributes (genre, cast, tags). Generates profile for each user based on previously liked items. Solves cold-start for new items.</p>
-                    <div class="metrics-badge" style="margin-top: 0.8rem;"><i class="fas fa-forward"></i> No dependency on other users</div>
-                </div>
-                <div class="card" style="grid-column: span 2;">
-                    <i class="fas fa-calculator" style="font-size: 1.8rem;"></i>
-                    <h3>Hybrid Fusion Function</h3>
-                    <p><code>FinalScore(u,i) = λ * CF_score(u,i) + (1-λ) * CB_score(u,i)</code> where λ ∈ [0,1] optimized on validation set. Combines advantages: CF brings serendipity, CB ensures relevance of item attributes. Additional fallback for cold-start: λ is adjusted to prioritize CB when user has sparse interactions. Ensemble outperforms single models by 19% in precision@k.</p>
-                    <div class="team-member" style="margin-top: 0.5rem;">Optimization: GridSearch + Bayesian hyperparameter tuning</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- REQUIREMENTS + TOOLS -->
-    <section id="requirements">
-        <div class="container">
-            <h2>Technical Requirements & Stack</h2>
-            <div class="grid-3">
-                <div class="card"><i class="fas fa-database requirement-icon"></i><h3>Data Requirements</h3><p>User rating dataset (implicit/explicit), Item feature catalog, interaction logs. Sample: MovieLens 1M, Amazon reviews.</p></div>
-                <div class="card"><i class="fab fa-python requirement-icon"></i><h3>ML Libraries</h3><p>Python 3.10+, Scikit-learn, Surprise, Pandas, NumPy, TensorFlow (optional for deep hybrid). Flask for API integration.</p></div>
-                <div class="card"><i class="fas fa-microchip requirement-icon"></i><h3>Compute & Storage</h3><p>Similarity matrix computation (distributed if needed), PostgreSQL / MongoDB for user profiles, GPU optional for large-scale SVD.</p></div>
-                <div class="card"><i class="fas fa-chart-line requirement-icon"></i><h3>Evaluation Metrics</h3><p>Precision@k, Recall@k, NDCG, RMSE, Coverage, Personalization index.</p></div>
-                <div class="card"><i class="fas fa-cloud-upload-alt requirement-icon"></i><h3>Deployment</h3><p>Flask/Django REST, Docker, real-time recommender pipeline via Redis for fast similarity lookups.</p></div>
-                <div class="card"><i class="fas fa-chart-simple requirement-icon"></i><h3>Offline & Online Eval</h3><p>A/B testing framework, offline cross-validation, user study feedback loop.</p></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- LITERATURE SURVEY -->
-    <section id="literature">
-        <div class="container">
-            <h2>Literature Survey & Comparisons</h2>
-            <div class="grid-3">
-                <div class="card">
-                    <i class="fas fa-book-open"></i>
-                    <h3>Pure Collaborative Filtering</h3>
-                    <p>Koren et al. (2009) - Matrix factorization techniques. Limitations: cold-start, gray sheep users. Sparsity degrades performance.</p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-scroll"></i>
-                    <h3>Content-based Filtering</h3>
-                    <p>Pazzani & Billsus (2007). Over-specialization, limited diversity. Requires rich item metadata & semantic understanding. </p>
-                </div>
-                <div class="card" style="border-left: 4px solid #3b82f6;">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Hybrid Models (State-of-art)</h3>
-                    <p>Burke (2002) taxonomy: Weighted, switching, cascade. Suggestify improves weighted approach with adaptive λ & ensemble similarity. Convergence of CF+CB beats Netflix prize hybrids.</p>
-                </div>
-            </div>
-            <div style="margin-top: 1.5rem; background: #eef2ff; border-radius: 1.5rem; padding: 1rem;">
-                <p><i class="fas fa-quote-left"></i> <strong>Our contribution:</strong> Hybrid method blending memory-based kNN with TF-IDF content similarity, improving recommendation coverage by 34% and reducing cold-start item blindness.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- OUTCOME & APPLICATIONS -->
-    <section id="outcome">
-        <div class="container">
-            <h2>Outcome & Real-world Applications</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
-                    <h3>Key Outcomes</h3>
-                    <ul style="margin-left: 1.2rem; margin-top: 0.75rem;">
-                        <li>✔ Personalized recommendations with 22% higher CTR</li>
-                        <li>✔ Hybrid approach → improved accuracy & serendipity</li>
-                        <li>✔ Effective similarity computation reduces latency</li>
-                        <li>✔ Scalable to million-scale user-item interactions</li>
-                        <li>✔ Handles 80% of cold-start items using CB fallback</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <i class="fas fa-globe" style="font-size: 2rem;"></i>
-                    <h3>Applications</h3>
-                    <ul style="margin-left: 1.2rem; margin-top: 0.75rem;">
-                        <li>🛒 E-commerce (Amazon, Flipkart) “You may also like”</li>
-                        <li>🎬 OTT platforms (Netflix, Spotify) personalized playlists</li>
-                        <li>📚 Online learning (Coursera, Udemy) course recommendations</li>
-                        <li>📱 Social media feeds & relevant content discovery</li>
-                        <li>🏨 Travel / hospitality recommendation engines</li>
-                    </ul>
-                </div>
-            </div>
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                <div class="metrics-badge"><i class="fas fa-check-circle"></i> Precision@10: 0.89</div>
-                <div class="metrics-badge"><i class="fas fa-check-circle"></i> Recall@10: 0.84</div>
-                <div class="metrics-badge"><i class="fas fa-chart-simple"></i> Coverage ↑ 31%</div>
-                <div class="metrics-badge"><i class="fas fa-users"></i> User satisfaction +27%</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TEAM AND INSTITUTE -->
-    <section id="team">
-        <div class="container">
-            <h2>Research Team & Guide</h2>
-            <div class="grid-2">
-                <div class="card">
-                    <i class="fas fa-users-between"></i>
-                    <h3>Contributors</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
-                        <div><i class="fas fa-female"></i> <strong>Samyuktha K</strong> – Model architecture & hybrid fusion</div>
-                        <div><i class="fas fa-female"></i> <strong>Subha Pradha S</strong> – Content-based filtering & feature extraction</div>
-                        <div><i class="fas fa-female"></i> <strong>Subhiksha P</strong> – Collaborative filtering optimization & evaluation</div>
-                    </div>
-                    <hr style="margin: 1rem 0;">
-                    <p><i class="fas fa-chalkboard-user"></i> <strong>Internal Guide:</strong> Prof. (Dept. of CCE) | Area: Machine Learning & Recommender Systems</p>
-                </div>
-                <div class="card" style="background: linear-gradient(125deg, #f8fafc, white);">
-                    <i class="fas fa-university" style="font-size: 2rem;"></i>
-                    <h3>Rajalakshmi Institute of Technology</h3>
-                    <p>Department of Computer and Communication Engineering (CCE)<br> Mini Project Review – Paper Presentation<br> <strong>Domain:</strong> Machine Learning | Hybrid Recommendation Systems</p>
-                    <div class="metrics-badge" style="margin-top: 1rem;"><i class="fas fa-certificate"></i> Research dissemination – SmartRecSys track</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CITATION / FUTURE WORK -->
-    <section style="padding: 2rem 0 3rem 0;">
-        <div class="container">
-            <div style="background: #1e293b; border-radius: 2rem; padding: 1.8rem; color: #e2e8f0; text-align: center;">
-                <i class="fas fa-chart-line" style="font-size: 2rem; color:#60a5fa;"></i>
-                <p style="margin-top: 1rem;"><strong>Future Enhancements:</strong> Deep learning based embeddings (Neural CF), real-time context-awareness, federated learning for privacy-preserving recommendations. Integration with LLM for explainable recsys.</p>
-                <p class="mt-2" style="margin-top: 1rem; font-size: 0.85rem;">© 2026 Suggestify – Hybrid Recommendation System using ML | Paper presented at Institute Research Colloquium</p>
-            </div>
-        </div>
-    </section>
-</main>
-
-<footer>
-    <div class="container">
-        <p><i class="fas fa-brain"></i> Suggestify: bridging collaborative & content intelligence for next-gen personalization</p>
-        <p style="margin-top: 0.5rem; font-size: 0.8rem;">RAJALAKSHMI INSTITUTE OF TECHNOLOGY | Department of CCE | Hybrid ML System</p>
-    </div>
-</footer>
-
-<!-- optional minimalist smooth finnicky -->
-<script>
-    document.querySelectorAll('.nav-links a').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if(href && href.startsWith('#')){
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if(target){
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // ---------- HELPER: Hybrid score (60% collab + 40% content) ----------
+        function computeHybridScore(movie, ratings, allMovies) {
+            // Collaborative: normalize global avg rating from 1-5 to 0-1
+            const collabScore = (movie.avg_rating - 1) / 4;
+            let contentScore = 0.3; // default if no rated movies
+            const ratedIds = Object.keys(ratings).map(Number);
+            if (ratedIds.length > 0) {
+                const highRated = ratedIds.filter(id => ratings[id] >= 4);
+                if (highRated.length > 0) {
+                    const catCount = {};
+                    highRated.forEach(id => {
+                        const m = allMovies.find(x => x.id === id);
+                        if (m) catCount[m.category] = (catCount[m.category] || 0) + 1;
+                    });
+                    const favCat = Object.entries(catCount).sort((a,b) => b[1] - a[1])[0][0];
+                    contentScore = (movie.category === favCat) ? 1.0 : 0.3;
                 }
             }
-        });
-    });
-</script>
+            return (collabScore * 0.6) + (contentScore * 0.4);
+        }
+
+        // ---------- STATE ----------
+        let currentUser = null;          // { email, name }
+        let userRatings = {};             // { movieId: rating }
+        let toastTimeout = null;
+
+        // DOM elements
+        const appDiv = document.getElementById('app');
+
+        // ---------- RENDER LOGIN ----------
+        function renderLogin() {
+            appDiv.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
+                    <div class="glass" style="max-width: 420px; width: 100%; padding: 40px; text-align: center;">
+                        <h1 style="font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #34d399); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 12px;">Suggestify AI</h1>
+                        <p style="color: #94a3b8; margin-bottom: 32px;">Hybrid ML recommendation engine</p>
+                        <div style="text-align: left;">
+                            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px;">Email</label>
+                            <input type="email" id="loginEmail" placeholder="you@example.com" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 12px; color: white; margin-bottom: 20px;">
+                            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px;">Name</label>
+                            <input type="text" id="loginName" placeholder="Alex Chen" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 12px; color: white; margin-bottom: 28px;">
+                        </div>
+                        <button id="loginBtn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; color: white; font-weight: 600; padding: 12px 24px; border-radius: 40px; width: 100%; cursor: pointer;">Enter Suggestify →</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                const email = document.getElementById('loginEmail').value.trim();
+                const name = document.getElementById('loginName').value.trim() || email.split('@')[0];
+                if (!email.includes('@')) {
+                    showToast('Enter a valid email', true);
+                    return;
+                }
+                currentUser = { email, name };
+                // Load ratings from localStorage for this email
+                const stored = localStorage.getItem(`ratings_${email}`);
+                if (stored) {
+                    userRatings = JSON.parse(stored);
+                } else {
+                    userRatings = {};
+                }
+                renderDashboard();
+            });
+        }
+
+        // ---------- TOAST ----------
+        function showToast(msg, isError = false) {
+            let toastDiv = document.getElementById('global-toast');
+            if (!toastDiv) {
+                toastDiv = document.createElement('div');
+                toastDiv.id = 'global-toast';
+                toastDiv.style.position = 'fixed';
+                toastDiv.style.bottom = '30px';
+                toastDiv.style.left = '50%';
+                toastDiv.style.transform = 'translateX(-50%)';
+                toastDiv.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                toastDiv.style.backdropFilter = 'blur(12px)';
+                toastDiv.style.padding = '10px 20px';
+                toastDiv.style.borderRadius = '40px';
+                toastDiv.style.color = 'white';
+                toastDiv.style.fontSize = '14px';
+                toastDiv.style.zIndex = '9999';
+                toastDiv.style.border = '1px solid rgba(168,85,247,0.3)';
+                document.body.appendChild(toastDiv);
+            }
+            toastDiv.textContent = msg;
+            toastDiv.style.display = 'block';
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastDiv.style.display = 'none';
+            }, 2500);
+        }
+
+        // ---------- RENDER DASHBOARD ----------
+        function renderDashboard() {
+            const ratedIds = Object.keys(userRatings).map(Number);
+            // Compute hybrid score for unwatched movies, get top 12
+            let recommendations = movies
+                .filter(m => !ratedIds.includes(m.id))
+                .map(m => ({ ...m, score: computeHybridScore(m, userRatings, movies) }))
+                .sort((a,b) => b.score - a.score)
+                .slice(0, 12);
+            
+            if (recommendations.length === 0) {
+                // if all rated, show top rated overall
+                recommendations = movies
+                    .map(m => ({ ...m, score: computeHybridScore(m, userRatings, movies) }))
+                    .sort((a,b) => b.score - a.score)
+                    .slice(0, 12);
+            }
+
+            // Favorite genre from high ratings (>=4)
+            let favGenre = '—';
+            const highRated = ratedIds.filter(id => userRatings[id] >= 4);
+            if (highRated.length) {
+                const catCount = {};
+                highRated.forEach(id => {
+                    const m = movies.find(x => x.id === id);
+                    if (m) catCount[m.category] = (catCount[m.category] || 0) + 1;
+                });
+                const top = Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0];
+                if (top) favGenre = top[0];
+            }
+
+            const avgRating = ratedIds.length ? (ratedIds.reduce((s,id)=>s+userRatings[id],0)/ratedIds.length).toFixed(1) : '—';
+
+            const categoryColors = { 'Sci-Fi':'#a78bfa', 'Action':'#fb923c', 'Romance':'#f472b6' };
+            
+            appDiv.innerHTML = `
+                <div style="padding: 20px 24px;">
+                    <!-- Navbar -->
+                    <div class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; margin-bottom: 32px; border-radius: 60px;">
+                        <div style="font-weight: 800; font-size: 24px; background: linear-gradient(135deg, #a78bfa, #34d399); -webkit-background-clip: text; background-clip: text; color: transparent;">Suggestify AI</div>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div style="background: linear-gradient(135deg, #6366f1, #34d399); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${currentUser.name[0].toUpperCase()}</div>
+                            <span>${currentUser.name}</span>
+                            <button id="logoutBtn" style="background: none; border: 1px solid #334155; padding: 6px 14px; border-radius: 30px; color: #cbd5e1; cursor: pointer;">Sign out</button>
+                        </div>
+                    </div>
+
+                    <!-- Hero -->
+                    <div style="margin-bottom: 32px;">
+                        <h2 style="font-size: 32px; font-weight: 700;">Good to see you, <span style="background: linear-gradient(135deg,#a78bfa,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent;">${currentUser.name.split(' ')[0]}</span> 👋</h2>
+                        <p style="color: #94a3b8;">Your hybrid AI picks · 60% collaborative + 40% content-based</p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 40px;">
+                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">RATED</div><div style="font-size: 28px; font-weight: 700;">${ratedIds.length}</div></div>
+                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">AVG RATING</div><div style="font-size: 28px; font-weight: 700;">${avgRating}</div></div>
+                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">TOP GENRE</div><div style="font-size: 28px; font-weight: 700;">${favGenre}</div></div>
+                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">MOVIES</div><div style="font-size: 28px; font-weight: 700;">${movies.length}</div></div>
+                    </div>
+
+                    <!-- Recommendations grid -->
+                    <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">🎬 Recommended for you</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                        ${recommendations.map(movie => {
+                            const userRating = userRatings[movie.id] || 0;
+                            const scorePercent = Math.round(movie.score * 100);
+                            const accent = categoryColors[movie.category] || '#a78bfa';
+                            return `
+                                <div class="glass-card" style="border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;">
+                                    <div style="height: 4px; background: linear-gradient(90deg, ${accent}, #34d399);"></div>
+                                    <div style="padding: 20px;">
+                                        <div style="font-size: 12px; color: ${accent}; letter-spacing: 1px; margin-bottom: 8px;">${movie.category}</div>
+                                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">${movie.title}</div>
+                                        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">${movie.year}</div>
+                                        <div style="font-size: 13px; color: #9ca3af; line-height: 1.5; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</div>
+                                        ${userRating === 0 ? `
+                                            <div style="margin-bottom: 14px;">
+                                                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Match score</span><span>${scorePercent}%</span></div>
+                                                <div style="height: 4px; background: #1e293b; border-radius: 4px; overflow: hidden;"><div style="width: ${scorePercent}%; height: 100%; background: linear-gradient(90deg, #6366f1, #34d399); border-radius: 4px;"></div></div>
+                                            </div>
+                                        ` : `
+                                            <div style="margin-bottom: 14px; font-size: 13px;">Your rating: ${'⭐'.repeat(userRating)}</div>
+                                        `}
+                                        <div style="display: flex; gap: 6px;" id="stars-${movie.id}">
+                                            ${[1,2,3,4,5].map(s => `
+                                                <button class="star-btn ${userRating >= s ? '' : 'star-inactive'}" data-movie="${movie.id}" data-star="${s}" style="font-size: 24px;">★</button>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Attach rating events
+            recommendations.forEach(movie => {
+                for (let s=1; s<=5; s++) {
+                    const btn = document.querySelector(`.star-btn[data-movie="${movie.id}"][data-star="${s}"]`);
+                    if (btn) {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const movieId = parseInt(btn.dataset.movie);
+                            const star = parseInt(btn.dataset.star);
+                            rateMovie(movieId, star);
+                        });
+                    }
+                }
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                currentUser = null;
+                userRatings = {};
+                renderLogin();
+            });
+        }
+
+        function rateMovie(movieId, rating) {
+            if (!currentUser) return;
+            // Update state
+            userRatings[movieId] = rating;
+            // Persist to localStorage
+            localStorage.setItem(`ratings_${currentUser.email}`, JSON.stringify(userRatings));
+            showToast(`⭐ Rated ${rating} star${rating > 1 ? 's' : ''}!`, false);
+            // Re-render dashboard to reflect new ratings and updated recommendations
+            renderDashboard();
+        }
+
+        // Start the app
+        renderLogin();
+    </script>
 </body>
 </html>
