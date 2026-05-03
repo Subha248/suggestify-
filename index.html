@@ -2,301 +2,441 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suggestify AI – Hybrid Recommender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Suggestify AI – Hybrid Recommendation System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0b1120 0%, #111827 100%);
-            color: #e2e8f0;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(15, 12, 41, 1) 0%, rgba(48, 43, 99, 1) 70%, rgba(36, 36, 62, 1) 100%);
             min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
         }
-        .glass {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 24px;
+
+        /* animated gradient background */
+        .animated-bg {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(168,85,247,0.25) 0%, rgba(236,72,153,0.15) 50%, rgba(15,12,41,0) 80%);
+            animation: rotateBg 24s infinite linear;
+            z-index: -2;
         }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* glassmorphism card */
         .glass-card {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: rgba(20, 20, 40, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
         .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 30px -15px rgba(0,0,0,0.3);
+            transform: translateY(-8px) scale(1.01);
+            border-color: rgba(168, 85, 247, 0.7);
+            box-shadow: 0 25px 40px -12px rgba(168, 85, 247, 0.3);
+            background: rgba(30, 30, 60, 0.5);
         }
-        button {
-            transition: all 0.2s;
+
+        /* movie poster placeholder */
+        .movie-poster {
+            background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(236,72,153,0.2));
+            border-radius: 24px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            transition: transform 0.3s ease;
         }
-        .star-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
+        .glass-card:hover .movie-poster {
+            transform: scale(0.98);
+        }
+
+        /* star rating */
+        .star {
+            font-size: 28px;
             cursor: pointer;
-            color: #fbbf24;
-            transition: transform 0.1s;
+            transition: all 0.15s ease;
+            color: rgba(255, 255, 255, 0.3);
+            display: inline-block;
         }
-        .star-btn:hover { transform: scale(1.2); }
-        .star-inactive { opacity: 0.3; filter: grayscale(0.8); }
+        .star.active, .star:hover {
+            color: #fbbf24;
+            text-shadow: 0 0 8px #fbbf24;
+            transform: scale(1.15);
+        }
+
+        /* progress bar */
+        .progress-wrapper {
+            margin-top: 12px;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 4px;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* toast */
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* card entrance animation */
+        .movie-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* responsive grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.75rem;
+        }
+        @media (min-width: 640px) {
+            .grid-container { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 768px) {
+            .grid-container { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 1024px) {
+            .grid-container { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* buttons and inputs */
+        .btn-primary {
+            background: linear-gradient(105deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 40px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(168,85,247,0.3);
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(168,85,247,0.5);
+        }
+        .btn-outline {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 40px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(168,85,247,0.7);
+        }
+        input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 60px;
+            padding: 12px 20px;
+            color: white;
+            width: 100%;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 12px rgba(168,85,247,0.4);
+        }
+        ::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
     </style>
 </head>
-<body style="padding: 20px; max-width: 1400px; margin: 0 auto;">
-    <div id="app">
-        <!-- Login view will be injected -->
+<body>
+<div class="animated-bg"></div>
+<div class="noise"></div>
+
+<div id="app">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen p-5">
+        <div class="glass-card w-full max-w-md p-8 text-center" style="animation: fadeInUp 0.6s ease-out;">
+            <div class="text-7xl mb-4 animate-pulse">🎬</div>
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">Suggestify AI</h1>
+            <p class="text-white/70 mt-2 mb-6 text-sm">Hybrid recommendation engine · 60% collaborative + 40% content-based</p>
+            <input type="email" id="emailInput" placeholder="you@university.edu" autocomplete="off" class="mb-5">
+            <button id="loginBtn" class="btn-primary w-full">✨ Get Started</button>
+            <p class="text-white/40 text-xs mt-6">ratings stored locally · real-time personalization</p>
+        </div>
     </div>
-    <script>
-        // ---------- MOVIE DATABASE (20 movies) ----------
-        const movies = [
-            { id:1, title:"Blade Runner", description:"A blade runner hunts replicants in dystopian 2019 Los Angeles.", category:"Sci-Fi", avg_rating:4.5, year:1982 },
-            { id:2, title:"The Terminator", description:"A cyborg assassin is sent back in time to kill Sarah Connor.", category:"Action", avg_rating:4.3, year:1984 },
-            { id:3, title:"When Harry Met Sally", description:"Can a man and woman be just friends? Harry and Sally find out.", category:"Romance", avg_rating:4.1, year:1989 },
-            { id:4, title:"Interstellar", description:"Astronauts traverse a wormhole searching for a new home for humanity.", category:"Sci-Fi", avg_rating:4.6, year:2014 },
-            { id:5, title:"Titanic", description:"An aristocrat and a poor artist fall in love on the doomed ocean liner.", category:"Romance", avg_rating:4.2, year:1997 },
-            { id:6, title:"The Matrix", description:"A hacker discovers reality is a simulation and joins the resistance.", category:"Sci-Fi", avg_rating:4.7, year:1999 },
-            { id:7, title:"Inception", description:"A thief plants an idea into a target's subconscious through dream invasion.", category:"Sci-Fi", avg_rating:4.5, year:2010 },
-            { id:8, title:"Mad Max: Fury Road", description:"In a wasteland, Furiosa leads a rebellion against a tyrannical warlord.", category:"Action", avg_rating:4.4, year:2015 },
-            { id:9, title:"La La Land", description:"A musician and actress pursue their dreams while falling in love in LA.", category:"Romance", avg_rating:4.0, year:2016 },
-            { id:10, title:"Gravity", description:"Two astronauts struggle to survive adrift in space after an accident.", category:"Sci-Fi", avg_rating:3.9, year:2013 },
-            { id:11, title:"John Wick", description:"A retired hitman goes on a rampage after his dog is killed.", category:"Action", avg_rating:4.2, year:2014 },
-            { id:12, title:"Pride & Prejudice", description:"Elizabeth Bennet navigates love, pride, and prejudice with Mr. Darcy.", category:"Romance", avg_rating:4.3, year:2005 },
-            { id:13, title:"Arrival", description:"A linguist deciphers alien language that reveals a shocking truth about time.", category:"Sci-Fi", avg_rating:4.4, year:2016 },
-            { id:14, title:"The Dark Knight", description:"Batman battles the Joker, a chaotic criminal genius, in Gotham City.", category:"Action", avg_rating:4.7, year:2008 },
-            { id:15, title:"Eternal Sunshine", description:"A couple erases each other from memory after their relationship ends.", category:"Romance", avg_rating:4.4, year:2004 },
-            { id:16, title:"Ex Machina", description:"A programmer tests an AI with artificial consciousness and human-like behavior.", category:"Sci-Fi", avg_rating:4.2, year:2014 },
-            { id:17, title:"Speed", description:"A bomb on a bus will explode if it drops below 50 mph.", category:"Action", avg_rating:3.8, year:1994 },
-            { id:18, title:"Sense and Sensibility", description:"The Dashwood sisters navigate romance, heartbreak, and societal expectations.", category:"Romance", avg_rating:3.9, year:1995 },
-            { id:19, title:"Dune", description:"Paul Atreides leads desert tribes in a revolt to control the universe's most precious resource.", category:"Sci-Fi", avg_rating:4.3, year:2021 },
-            { id:20, title:"Top Gun: Maverick", description:"Maverick trains elite pilots for a dangerous mission thirty years later.", category:"Action", avg_rating:4.5, year:2022 }
-        ];
 
-        // ---------- HELPER: Hybrid score (60% collab + 40% content) ----------
-        function computeHybridScore(movie, ratings, allMovies) {
-            // Collaborative: normalize global avg rating from 1-5 to 0-1
-            const collabScore = (movie.avg_rating - 1) / 4;
-            let contentScore = 0.3; // default if no rated movies
-            const ratedIds = Object.keys(ratings).map(Number);
-            if (ratedIds.length > 0) {
-                const highRated = ratedIds.filter(id => ratings[id] >= 4);
-                if (highRated.length > 0) {
-                    const catCount = {};
-                    highRated.forEach(id => {
-                        const m = allMovies.find(x => x.id === id);
-                        if (m) catCount[m.category] = (catCount[m.category] || 0) + 1;
-                    });
-                    const favCat = Object.entries(catCount).sort((a,b) => b[1] - a[1])[0][0];
-                    contentScore = (movie.category === favCat) ? 1.0 : 0.3;
-                }
-            }
-            return (collabScore * 0.6) + (contentScore * 0.4);
+    <!-- DASHBOARD -->
+    <div id="dashboardScreen" style="display: none; padding: 1.5rem;">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">Suggestify AI</h1>
+                    <p class="text-white/60 text-sm mt-1">⚡ Hybrid active · <span id="ratingCountSpan">0</span> movies rated</p>
+                </div>
+                <button id="logoutBtn" class="btn-outline text-white/90">↺ Logout</button>
+            </div>
+            <div class="glass-card p-5 mb-8 text-center md:text-left">
+                <p id="statsMessage" class="text-white/80 text-sm md:text-base">⭐ Rate any movie – hybrid algorithm will learn your preferences and update recommendations instantly.</p>
+            </div>
+            <h2 class="text-2xl font-bold mb-6 tracking-tight">🎯 Curated for you</h2>
+            <div id="moviesGrid" class="grid-container"></div>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast">⭐ Rated!</div>
+
+<script>
+    // ==================== MOVIE DATASET ====================
+    const MOVIES = [
+        { id: 1, title: "Inception", desc: "Dream within a dream", cat: "Sci‑Fi", gr: 4.2, year: 2010, emoji: "🌌" },
+        { id: 2, title: "The Matrix", desc: "Reality is a simulation", cat: "Sci‑Fi", gr: 4.5, year: 1999, emoji: "💊" },
+        { id: 3, title: "Titanic", desc: "Epic romance on the doomed ship", cat: "Romance", gr: 4.4, year: 1997, emoji: "🚢" },
+        { id: 4, title: "The Dark Knight", desc: "Batman vs Joker", cat: "Action", gr: 4.6, year: 2008, emoji: "🦇" },
+        { id: 5, title: "Avatar", desc: "Journey to Pandora", cat: "Sci‑Fi", gr: 4.3, year: 2009, emoji: "🌍" },
+        { id: 6, title: "The Notebook", desc: "Love that lasts a lifetime", cat: "Romance", gr: 4.1, year: 2004, emoji: "💌" },
+        { id: 7, title: "John Wick", desc: "One man. One dog. Ultimate revenge", cat: "Action", gr: 4.4, year: 2014, emoji: "🔫" },
+        { id: 8, title: "Interstellar", desc: "Wormhole travel to save humanity", cat: "Sci‑Fi", gr: 4.7, year: 2014, emoji: "🪐" },
+        { id: 9, title: "La La Land", desc: "Musical romance in LA", cat: "Romance", gr: 4.0, year: 2016, emoji: "🎹" },
+        { id: 10, title: "Gladiator", desc: "Roman revenge", cat: "Action", gr: 4.5, year: 2000, emoji: "⚔️" },
+        { id: 11, title: "Jurassic Park", desc: "Dinosaurs run wild", cat: "Sci‑Fi", gr: 4.3, year: 1993, emoji: "🦖" },
+        { id: 12, title: "Pretty Woman", desc: "Romantic comedy classic", cat: "Romance", gr: 3.9, year: 1990, emoji: "💍" },
+        { id: 13, title: "Die Hard", desc: "Christmas action masterpiece", cat: "Action", gr: 4.4, year: 1988, emoji: "💣" },
+        { id: 14, title: "Back to the Future", desc: "Time travel adventure", cat: "Sci‑Fi", gr: 4.5, year: 1985, emoji: "⏰" },
+        { id: 15, title: "When Harry Met Sally", desc: "Romantic comedy", cat: "Romance", gr: 4.0, year: 1989, emoji: "🍝" },
+        { id: 16, title: "Mad Max: Fury Road", desc: "Post-apocalyptic action", cat: "Action", gr: 4.2, year: 2015, emoji: "🏜️" },
+        { id: 17, title: "E.T.", desc: "Friendly alien", cat: "Sci‑Fi", gr: 4.3, year: 1982, emoji: "👽" },
+        { id: 18, title: "The Proposal", desc: "Fake marriage turns real", cat: "Romance", gr: 3.8, year: 2009, emoji: "💒" },
+        { id: 19, title: "Kill Bill", desc: "Bride seeks revenge", cat: "Action", gr: 4.3, year: 2003, emoji: "🗡️" },
+        { id: 20, title: "Star Wars", desc: "Epic space opera", cat: "Sci‑Fi", gr: 4.6, year: 1977, emoji: "✨" }
+    ];
+
+    let currentUserEmail = null;
+
+    // localStorage helpers
+    function getRatings(email) {
+        const stored = localStorage.getItem(`suggestify_ratings_${email}`);
+        return stored ? JSON.parse(stored) : {};
+    }
+    function saveRatings(email, ratingsObj) {
+        localStorage.setItem(`suggestify_ratings_${email}`, JSON.stringify(ratingsObj));
+    }
+
+    // =============== HYBRID RECOMMENDATION ENGINE ===============
+    // 60% collaborative (global rating) + 40% content-based (favorite category)
+    function getRecommendations(ratings, allMovies) {
+        const ratedIds = Object.keys(ratings).map(Number);
+        if (ratedIds.length === 0) {
+            // cold-start: return top global rating movies
+            return [...allMovies].sort((a,b) => b.gr - a.gr).slice(0,12);
         }
 
-        // ---------- STATE ----------
-        let currentUser = null;          // { email, name }
-        let userRatings = {};             // { movieId: rating }
-        let toastTimeout = null;
+        // determine user's favorite category (based on ratings >=4)
+        const categoryCount = {};
+        ratedIds.forEach(id => {
+            const movie = allMovies.find(m => m.id === id);
+            if (movie && ratings[id] >= 4) {
+                categoryCount[movie.cat] = (categoryCount[movie.cat] || 0) + 1;
+            }
+        });
+        let favoriteCategory = '';
+        let maxCount = 0;
+        for (const [cat, count] of Object.entries(categoryCount)) {
+            if (count > maxCount) {
+                maxCount = count;
+                favoriteCategory = cat;
+            }
+        }
 
-        // DOM elements
-        const appDiv = document.getElementById('app');
+        // compute hybrid score for every movie
+        const scored = allMovies.map(movie => {
+            const collabScore = movie.gr / 5.0;                // 60% weight
+            const contentScore = (movie.cat === favoriteCategory) ? 1.0 : 0.3;  // 40% weight
+            const hybrid = (collabScore * 0.6) + (contentScore * 0.4);
+            return { ...movie, hybridScore: hybrid };
+        });
 
-        // ---------- RENDER LOGIN ----------
-        function renderLogin() {
-            appDiv.innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
-                    <div class="glass" style="max-width: 420px; width: 100%; padding: 40px; text-align: center;">
-                        <h1 style="font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #34d399); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 12px;">Suggestify AI</h1>
-                        <p style="color: #94a3b8; margin-bottom: 32px;">Hybrid ML recommendation engine</p>
-                        <div style="text-align: left;">
-                            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px;">Email</label>
-                            <input type="email" id="loginEmail" placeholder="you@example.com" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 12px; color: white; margin-bottom: 20px;">
-                            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px;">Name</label>
-                            <input type="text" id="loginName" placeholder="Alex Chen" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 12px; color: white; margin-bottom: 28px;">
+        // exclude already rated movies (unless all movies are rated – then show best hybrid)
+        let filtered = scored;
+        if (ratedIds.length > 0 && ratedIds.length < allMovies.length) {
+            filtered = scored.filter(m => !ratedIds.includes(m.id));
+        }
+        return filtered.sort((a,b) => b.hybridScore - a.hybridScore).slice(0,12);
+    }
+
+    // render dashboard with smooth animation
+    function renderDashboard() {
+        if (!currentUserEmail) return;
+        const ratings = getRatings(currentUserEmail);
+        const recommendations = getRecommendations(ratings, MOVIES);
+        const ratedCount = Object.keys(ratings).length;
+
+        document.getElementById('ratingCountSpan').innerText = ratedCount;
+        const statsMsg = ratedCount === 0
+            ? "✨ Rate at least one movie – the hybrid engine will start suggesting movies based on your taste."
+            : `🎯 Hybrid active: ${ratedCount} movie${ratedCount !== 1 ? 's' : ''} rated. Score = 60% global popularity + 40% category affinity.`;
+        document.getElementById('statsMessage').innerHTML = statsMsg;
+
+        const grid = document.getElementById('moviesGrid');
+        grid.innerHTML = '';
+        recommendations.forEach((movie, idx) => {
+            const userRating = ratings[movie.id] || 0;
+            let starsHtml = '';
+            for (let s = 1; s <= 5; s++) {
+                const activeClass = (userRating >= s) ? 'active' : '';
+                starsHtml += `<span class="star ${activeClass}" data-id="${movie.id}" data-val="${s}">★</span>`;
+            }
+
+            const hybridPercent = Math.round((movie.hybridScore || 0) * 100);
+            const showProgress = (ratedCount > 0 && !ratings[movie.id]);
+
+            const card = document.createElement('div');
+            card.className = 'glass-card p-5 flex flex-col movie-card';
+            card.style.animationDelay = `${idx * 0.05}s`;
+            card.innerHTML = `
+                <div class="movie-poster">${movie.emoji}</div>
+                <h3 class="text-2xl font-bold mt-1">${movie.title}</h3>
+                <p class="text-white/70 text-sm leading-relaxed mt-1">${movie.desc}</p>
+                <div class="flex justify-between items-center mt-3">
+                    <span class="text-xs px-3 py-1 rounded-full bg-purple-500/30 text-purple-200">${movie.cat}</span>
+                    <span class="text-xs text-white/50">${movie.year}</span>
+                </div>
+                <div class="mt-4 pt-3 border-t border-white/20">
+                    <div class="text-white/60 text-xs mb-2">Rate this movie</div>
+                    <div class="flex gap-1 stars-container" data-id="${movie.id}">${starsHtml}</div>
+                    ${userRating ? `<p class="text-yellow-400/90 text-xs mt-2">${'⭐'.repeat(userRating)} Your rating</p>` : ''}
+                    ${showProgress ? `
+                        <div class="progress-wrapper">
+                            <div class="progress-label">
+                                <span>Hybrid relevance</span>
+                                <span>${hybridPercent}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${hybridPercent}%;"></div>
+                            </div>
                         </div>
-                        <button id="loginBtn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; color: white; font-weight: 600; padding: 12px 24px; border-radius: 40px; width: 100%; cursor: pointer;">Enter Suggestify →</button>
-                    </div>
+                    ` : ''}
                 </div>
             `;
-            document.getElementById('loginBtn').addEventListener('click', () => {
-                const email = document.getElementById('loginEmail').value.trim();
-                const name = document.getElementById('loginName').value.trim() || email.split('@')[0];
-                if (!email.includes('@')) {
-                    showToast('Enter a valid email', true);
-                    return;
-                }
-                currentUser = { email, name };
-                // Load ratings from localStorage for this email
-                const stored = localStorage.getItem(`ratings_${email}`);
-                if (stored) {
-                    userRatings = JSON.parse(stored);
-                } else {
-                    userRatings = {};
-                }
-                renderDashboard();
+            grid.appendChild(card);
+        });
+
+        // attach rating event listeners
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', (e) => {
+                const movieId = parseInt(star.getAttribute('data-id'));
+                const ratingVal = parseInt(star.getAttribute('data-val'));
+                const currentRatings = getRatings(currentUserEmail);
+                currentRatings[movieId] = ratingVal;
+                saveRatings(currentUserEmail, currentRatings);
+                // show toast
+                const toast = document.getElementById('toastMsg');
+                toast.innerText = `⭐ Rated ${ratingVal} stars! Recommendations refreshed.`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+                renderDashboard(); // real-time update
             });
+        });
+    }
+
+    // LOGIN handler
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        const emailInput = document.getElementById('emailInput');
+        const email = emailInput.value.trim();
+        if (!email || !email.includes('@')) {
+            alert('Please enter a valid email address (e.g., yourname@college.edu)');
+            return;
         }
+        currentUserEmail = email;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = 'block';
+        renderDashboard();
+    });
 
-        // ---------- TOAST ----------
-        function showToast(msg, isError = false) {
-            let toastDiv = document.getElementById('global-toast');
-            if (!toastDiv) {
-                toastDiv = document.createElement('div');
-                toastDiv.id = 'global-toast';
-                toastDiv.style.position = 'fixed';
-                toastDiv.style.bottom = '30px';
-                toastDiv.style.left = '50%';
-                toastDiv.style.transform = 'translateX(-50%)';
-                toastDiv.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                toastDiv.style.backdropFilter = 'blur(12px)';
-                toastDiv.style.padding = '10px 20px';
-                toastDiv.style.borderRadius = '40px';
-                toastDiv.style.color = 'white';
-                toastDiv.style.fontSize = '14px';
-                toastDiv.style.zIndex = '9999';
-                toastDiv.style.border = '1px solid rgba(168,85,247,0.3)';
-                document.body.appendChild(toastDiv);
-            }
-            toastDiv.textContent = msg;
-            toastDiv.style.display = 'block';
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toastDiv.style.display = 'none';
-            }, 2500);
-        }
+    // LOGOUT
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        currentUserEmail = null;
+        document.getElementById('dashboardScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('emailInput').value = '';
+    });
 
-        // ---------- RENDER DASHBOARD ----------
-        function renderDashboard() {
-            const ratedIds = Object.keys(userRatings).map(Number);
-            // Compute hybrid score for unwatched movies, get top 12
-            let recommendations = movies
-                .filter(m => !ratedIds.includes(m.id))
-                .map(m => ({ ...m, score: computeHybridScore(m, userRatings, movies) }))
-                .sort((a,b) => b.score - a.score)
-                .slice(0, 12);
-            
-            if (recommendations.length === 0) {
-                // if all rated, show top rated overall
-                recommendations = movies
-                    .map(m => ({ ...m, score: computeHybridScore(m, userRatings, movies) }))
-                    .sort((a,b) => b.score - a.score)
-                    .slice(0, 12);
-            }
-
-            // Favorite genre from high ratings (>=4)
-            let favGenre = '—';
-            const highRated = ratedIds.filter(id => userRatings[id] >= 4);
-            if (highRated.length) {
-                const catCount = {};
-                highRated.forEach(id => {
-                    const m = movies.find(x => x.id === id);
-                    if (m) catCount[m.category] = (catCount[m.category] || 0) + 1;
-                });
-                const top = Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0];
-                if (top) favGenre = top[0];
-            }
-
-            const avgRating = ratedIds.length ? (ratedIds.reduce((s,id)=>s+userRatings[id],0)/ratedIds.length).toFixed(1) : '—';
-
-            const categoryColors = { 'Sci-Fi':'#a78bfa', 'Action':'#fb923c', 'Romance':'#f472b6' };
-            
-            appDiv.innerHTML = `
-                <div style="padding: 20px 24px;">
-                    <!-- Navbar -->
-                    <div class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; margin-bottom: 32px; border-radius: 60px;">
-                        <div style="font-weight: 800; font-size: 24px; background: linear-gradient(135deg, #a78bfa, #34d399); -webkit-background-clip: text; background-clip: text; color: transparent;">Suggestify AI</div>
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <div style="background: linear-gradient(135deg, #6366f1, #34d399); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${currentUser.name[0].toUpperCase()}</div>
-                            <span>${currentUser.name}</span>
-                            <button id="logoutBtn" style="background: none; border: 1px solid #334155; padding: 6px 14px; border-radius: 30px; color: #cbd5e1; cursor: pointer;">Sign out</button>
-                        </div>
-                    </div>
-
-                    <!-- Hero -->
-                    <div style="margin-bottom: 32px;">
-                        <h2 style="font-size: 32px; font-weight: 700;">Good to see you, <span style="background: linear-gradient(135deg,#a78bfa,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent;">${currentUser.name.split(' ')[0]}</span> 👋</h2>
-                        <p style="color: #94a3b8;">Your hybrid AI picks · 60% collaborative + 40% content-based</p>
-                    </div>
-
-                    <!-- Stats -->
-                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 40px;">
-                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">RATED</div><div style="font-size: 28px; font-weight: 700;">${ratedIds.length}</div></div>
-                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">AVG RATING</div><div style="font-size: 28px; font-weight: 700;">${avgRating}</div></div>
-                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">TOP GENRE</div><div style="font-size: 28px; font-weight: 700;">${favGenre}</div></div>
-                        <div class="glass" style="padding: 12px 24px; border-radius: 20px;"><div style="font-size: 12px; color:#64748b;">MOVIES</div><div style="font-size: 28px; font-weight: 700;">${movies.length}</div></div>
-                    </div>
-
-                    <!-- Recommendations grid -->
-                    <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 20px;">🎬 Recommended for you</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
-                        ${recommendations.map(movie => {
-                            const userRating = userRatings[movie.id] || 0;
-                            const scorePercent = Math.round(movie.score * 100);
-                            const accent = categoryColors[movie.category] || '#a78bfa';
-                            return `
-                                <div class="glass-card" style="border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;">
-                                    <div style="height: 4px; background: linear-gradient(90deg, ${accent}, #34d399);"></div>
-                                    <div style="padding: 20px;">
-                                        <div style="font-size: 12px; color: ${accent}; letter-spacing: 1px; margin-bottom: 8px;">${movie.category}</div>
-                                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">${movie.title}</div>
-                                        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">${movie.year}</div>
-                                        <div style="font-size: 13px; color: #9ca3af; line-height: 1.5; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${movie.description}</div>
-                                        ${userRating === 0 ? `
-                                            <div style="margin-bottom: 14px;">
-                                                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Match score</span><span>${scorePercent}%</span></div>
-                                                <div style="height: 4px; background: #1e293b; border-radius: 4px; overflow: hidden;"><div style="width: ${scorePercent}%; height: 100%; background: linear-gradient(90deg, #6366f1, #34d399); border-radius: 4px;"></div></div>
-                                            </div>
-                                        ` : `
-                                            <div style="margin-bottom: 14px; font-size: 13px;">Your rating: ${'⭐'.repeat(userRating)}</div>
-                                        `}
-                                        <div style="display: flex; gap: 6px;" id="stars-${movie.id}">
-                                            ${[1,2,3,4,5].map(s => `
-                                                <button class="star-btn ${userRating >= s ? '' : 'star-inactive'}" data-movie="${movie.id}" data-star="${s}" style="font-size: 24px;">★</button>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-
-            // Attach rating events
-            recommendations.forEach(movie => {
-                for (let s=1; s<=5; s++) {
-                    const btn = document.querySelector(`.star-btn[data-movie="${movie.id}"][data-star="${s}"]`);
-                    if (btn) {
-                        btn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const movieId = parseInt(btn.dataset.movie);
-                            const star = parseInt(btn.dataset.star);
-                            rateMovie(movieId, star);
-                        });
-                    }
-                }
-            });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                currentUser = null;
-                userRatings = {};
-                renderLogin();
-            });
-        }
-
-        function rateMovie(movieId, rating) {
-            if (!currentUser) return;
-            // Update state
-            userRatings[movieId] = rating;
-            // Persist to localStorage
-            localStorage.setItem(`ratings_${currentUser.email}`, JSON.stringify(userRatings));
-            showToast(`⭐ Rated ${rating} star${rating > 1 ? 's' : ''}!`, false);
-            // Re-render dashboard to reflect new ratings and updated recommendations
-            renderDashboard();
-        }
-
-        // Start the app
-        renderLogin();
-    </script>
+    // small utility to ensure correct display on load
+    window.addEventListener('load', () => {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('dashboardScreen').style.display = 'none';
+    });
+</script>
 </body>
 </html>
